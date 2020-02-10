@@ -429,7 +429,7 @@ class CNRichTextEditor extends Component {
     const styles = this.props.styleList
       ? this.props.styleList
       : this.defaultStyles;
-    const { inputAccessoryViewID } = this.props;
+    const { inputAccessoryViewID, keyDownListener } = this.props;
     return (
       <View
         key={input.id}
@@ -441,6 +441,7 @@ class CNRichTextEditor extends Component {
           ref={input => {
             this.textInputs[index] = input;
           }}
+          keyDownListener={keyDownListener}
           inputAccessoryViewID={inputAccessoryViewID}
           items={input.content}
           onSelectedStyleChanged={this.onSelectedStyleChanged}
@@ -537,6 +538,7 @@ class CNRichTextEditor extends Component {
     );
   }
 
+  // STEP ONE - this is what initially triggers when a toolbar item is clicked
   applyToolbar(toolType) {
     const { focusInputIndex } = this.state;
 
@@ -547,6 +549,8 @@ class CNRichTextEditor extends Component {
       toolType === "ul" ||
       toolType === "ol"
     ) {
+      console.log("ADDING TAG");
+
       this.textInputs[focusInputIndex].applyTag(toolType);
     } else if (toolType == "image") {
       // convertToHtmlStringconvertToHtmlString(this.state.contents);
@@ -555,6 +559,11 @@ class CNRichTextEditor extends Component {
     }
     // if(toolType === 'bold' || toolType === 'italic' || toolType === 'underline' || toolType === 'lineThrough')
     else {
+      console.log("ADDING STYLE"); // this is used for things like bold, italic, underline
+
+      // this.textInputs = <CNTextInput />
+      // this.textInputs[focusInputtIndex] = <cnTextInput />
+      // applyStyle() is a method on CNTextInputs
       this.textInputs[focusInputIndex].applyStyle(toolType);
     }
   }

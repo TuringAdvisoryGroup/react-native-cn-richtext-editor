@@ -896,28 +896,59 @@ class CNTextInput extends Component {
 
     const newCollection = [];
 
+    console.log("TOOL TYPE ==>", toolType)
+    console.log("ITEMS ==>", items)
+
+    // array of objects in shape:
+    // id: "VBqGXfd0z"
+    // text: "hello"
+    // len: 5
+    // stype: []
+    // styleList: {}
+    // tag: "body"
+    // NewLine: true
+    // readOnly: false
+    // __proto__: Object
+    // length: 1
+    // __proto__: Array(0)
+
+
     const content = items;
     let indx = 0;
     let upComingAdded = false;
 
+
+    // this is one huge loop - consider refactoring to make it easier to modify 
     for (let i = 0; i < content.length; i++) {
       const { id, len, stype, tag, text, styleList } = content[i];
-      const NewLine = content[i].NewLine ? content[i].NewLine : false;
-      const readOnly = content[i].readOnly ? content[i].readOnly : false;
+      const NewLine = content[i].NewLine ? content[i].NewLine : false; // should this content go on a new line or same line?
+      const readOnly = content[i].readOnly ? content[i].readOnly : false; // what is read only?
 
-      const indexOfToolType = stype.indexOf(toolType);
+      const indexOfToolType = stype.indexOf(toolType); // find index of style (toolType = "bold" etc...)
+      // splice or push the style
       const newStype =
         indexOfToolType != -1
-          ? update(stype, { $splice: [[indexOfToolType, 1]] })
+          ? update(stype, { $splice: [[indexOfToolType, 1]] }) // update is an immutability helper
           : update(stype, { $push: [toolType] });
 
+
+      console.log("NEW S TYPE ==>", newStype, tag)
       const newStyles = StyleSheet.flatten(
         this.convertStyleList(update(newStype, { $push: [tag] }))
       );
 
-      const from = indx;
+      console.log("NEW STYLES ==>", newStyles)
+
+
+      // track the from and to index of the charaters in this content block 
+      const from = indx; 
       indx += len;
       const to = indx;
+
+      console.log("START =>", start);
+      console.log("END =>", end);
+      console.log("TO =>", to);
+      console.log("FROM ==>", from);
 
       if (readOnly) {
         newCollection.push({
@@ -930,7 +961,8 @@ class CNTextInput extends Component {
           NewLine,
           readOnly
         });
-
+        
+        // first content block, start 
         if (i === content.length - 1 && start === end && end === to) {
           if (upComingAdded === false) {
             if (
@@ -1149,15 +1181,18 @@ class CNTextInput extends Component {
   };
 
   applyTag(tagType) {
+
+    console.log("APPLY TAG =-=>", tagType)
     const { items } = this.props;
     const { selection } = this.state;
 
     const res = this.findContentIndex(items, selection.end);
+    console.log("ITEMS 2222 ==>", items, tagType, res.findIndx)
     const { content, recalcText } = this.changeToTagIn(
       items,
       tagType,
       res.findIndx
-    );
+      );
 
     if (recalcText == true) {
       this.oldText = this.reCalculateText(content);
@@ -1202,10 +1237,15 @@ class CNTextInput extends Component {
     const needBold = tag === "heading" || tag === "title";
     let content = items;
 
+    console.log(1111111)
+
     for (let i = index + 1; i < content.length; i++) {
       if (content[i].NewLine === true) {
+        console.log(2222222)
         break;
       } else {
+        console.log(333333)
+
         if (needBold === true && content[i].stype.indexOf("bold") == -1) {
           content[i].stype = update(content[i].stype, { $push: ["bold"] });
         } else if (
@@ -1216,6 +1256,8 @@ class CNTextInput extends Component {
           content[i].stype = content[i].stype.filter(typ => typ != "bold");
         }
         content[i].tag = tag;
+
+        console.log("CHANGED TAB ==>", content[i].tag)
         content[i].styleList = StyleSheet.flatten(
           this.convertStyleList(
             update(content[i].stype, { $push: [content[i].tag] })
@@ -1223,6 +1265,7 @@ class CNTextInput extends Component {
         );
       }
     }
+
     let shouldReorderList = false;
 
     for (let i = index; i >= 0; i--) {
@@ -1244,7 +1287,10 @@ class CNTextInput extends Component {
         content[i].stype = content[i].stype.filter(typ => typ != "bold");
       }
 
+
       content[i].tag = tag;
+      console.log(4444, content[i].tag)
+
       content[i].styleList = StyleSheet.flatten(
         this.convertStyleList(
           update(content[i].stype, { $push: [content[i].tag] })
@@ -1317,16 +1363,16 @@ class CNTextInput extends Component {
               content[i].text = content[i].text.substring(i === 0 ? 0 : 1);
               content[i].len = content[i].len - (i === 0 ? 0 : 1);
               content[i].NewLine = false;
-              listContent = {
+              listContent = { // this is where the list content gets built
                 id: shortid.generate(),
                 len: i === 0 ? 3 : 4,
                 stype: [],
-                text: i === 0 ? "1- " : "\n1- ",
+                  text: i === 0 ? "1- " : "\n1- ",
                 tag: "ol",
                 NewLine: true,
                 readOnly: true
               };
-              content = update(content, { $splice: [[i, 0, listContent]] });
+              content = update(content, { $splice: [[i, 0, listContent]] }); // this is where content gets added
             } else {
               content[i].text = i === 0 ? "1- " : "\n1- ";
               content[i].len = i === 0 ? 3 : 4;
@@ -1357,6 +1403,16 @@ class CNTextInput extends Component {
               content[0].text = "";
             }
           }
+        } else if (tag === "link"){
+          console.log("IS LINK ===> xyz", this.textLength, this.textLength -= content[i].len - 1 )
+
+          console.log("MERO ===>", 100  )
+
+          listContent = this.buildLinkContentBlock(i, shortid)
+
+          content = this.updateContent(content, listContent, i) // this is where content gets added
+
+
         }
 
         break;
@@ -1369,6 +1425,23 @@ class CNTextInput extends Component {
     }
 
     return { content, recalcText };
+  }
+
+
+  buildLinkContentBlock = (i,shortid) => {
+    return { // this is where the list content gets built
+      id: shortid.generate(),
+      len: i === 0 ? 4 : 5,
+      stype: [],
+        text: "link"
+      tag: "link",
+      NewLine: false,
+      readOnly: true
+    }
+  }
+
+  updateContent = (content, listContent, i) => {
+    return update(content, { $splice: [[i, 0, listContent]] });
   }
 
   reorderList(items) {
@@ -1439,6 +1512,10 @@ class CNTextInput extends Component {
     ) {
       if (this.props.onConnectToPrevClicked)
         this.props.onConnectToPrevClicked();
+    }
+
+    if(this.props.keyDownListener){
+      this.props.keyDownListener(e)
     }
   };
 
