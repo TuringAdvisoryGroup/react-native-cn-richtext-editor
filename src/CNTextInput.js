@@ -1514,63 +1514,67 @@ class CNTextInput extends Component {
     if (this.props.keyDownListener) {
       this.props.keyDownListener(e);
     }
-  };
 
-  handleContentSizeChange = event => {
-    if (this.props.onContentSizeChange) this.props.onContentSizeChange(event);
-  };
+  }
 
-  render() {
-    const {
-      items,
-      foreColor,
-      style,
-      returnKeyType,
-      styleList,
-      inputAccessoryViewID
-    } = this.props;
-    const { selection } = this.state;
-    const color = foreColor || "#000";
-    const fontSize =
-      styleList && styleList.body && styleList.body.fontSize
-        ? styleList.body.fontSize
-        : 20;
-
-    return (
-      <TextInput
-        inputAccessoryViewID={inputAccessoryViewID}
-        underlineColorAndroid='rgba(0,0,0,0)'
-        onSelectionChange={this.onSelectionChange}
-        multiline
-        style={[
-          {
+    render() {
+      const {
+        items, foreColor, style, returnKeyType, styleList, textInputProps,
+        inputAccessoryViewID
+      } = this.props;
+      const { selection } = this.state;
+      const color = foreColor || '#000';
+      const fontSize =styleList && styleList.body && styleList.body.fontSize ? styleList.body.fontSize : 20;
+      
+      return (
+        <TextInput
+          {...textInputProps}
+          underlineColorAndroid="rgba(0,0,0,0)"
+          onSelectionChange={this.onSelectionChange}
+          inputAccessoryViewID={inputAccessoryViewID}
+          multiline
+          style={[{
             color,
             fontSize: fontSize,
             paddingTop: 5,
             paddingBottom: 5,
             paddingLeft: 2,
             paddingRight: 2,
-            textAlignVertical: "top"
-          },
-          style || {}
-        ]}
-        scrollEnabled={false}
-        returnKeyType={returnKeyType || "next"}
-        keyboardType='default'
-        ref={component => (this.textInput = component)}
-        onChangeText={this.handleChangeText}
-        onKeyPress={this.handleKeyDown}
-        selection={selection}
-        onFocus={this.onFocus}
-        onBlur={this.onBlur}
-        onContentSizeChange={this.handleContentSizeChange}
-        placeholder={this.props.placeholder}>
-        {_.map(items, item => (
-          <CNStyledText key={item.id} style={item.styleList} text={item.text} />
-        ))}
-      </TextInput>
-    );
-  }
+            textAlignVertical: 'top',
+          }, style || {}]}
+          scrollEnabled={false}
+          returnKeyType={returnKeyType || 'next'}
+          keyboardType="default"
+          ref={component => this.textInput = component}
+          onChangeText={this.handleChangeText}
+          onKeyPress={this.handleKeyDown}
+          selection={selection}
+          onFocus={this.onFocus}
+          onBlur={this.onBlur}
+          onContentSizeChange={this.handleContentSizeChange}
+          placeholder={this.props.placeholder}
+        >
+          {
+              _.map(items, item => (
+                <CNStyledText key={item.id} style={item.styleList} text={item.text} />
+              ))
+            }
+        </TextInput>
+      );
+    }
+
+    splitItems() {
+      const { selection } = this.state;
+      const { items } = this.props;
+      const content = items;
+      const result = this.findContentIndex(content, selection.end);
+      let beforeContent = [];
+      let afterContent = [];
+
+      for (let i = 0; i < result.findIndx; i++) {
+        const element = content[i];
+        beforeContent.push(element);
+      }
 
   splitItems() {
     const { selection } = this.state;
