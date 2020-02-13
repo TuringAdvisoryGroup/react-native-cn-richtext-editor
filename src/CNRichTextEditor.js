@@ -389,8 +389,10 @@ class CNRichTextEditor extends Component {
           // ref.textLength = ref.textLength + 2 + this.textInputs[index + 1].textLength;
         }
       }
+    }
 
       newConents = update(newConents, { $splice: [[index, removeCout]] });
+
 
       this.contentHeights = update(this.contentHeights, {
         $splice: [[index, removeCout]]
