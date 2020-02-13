@@ -351,30 +351,16 @@ class CNRichTextEditor extends Component {
                   text: "\n",
                   tag: "body",
                   stype: [],
-                  styleList: [{
-                    fontSize: 20,
-                  }],
-                  NewLine: true,
-                },
-              ]],
-            });
-
-            prevContent.content = update(prevContent.content, { $push: nextContent.content });
-
-            newConents = update(newConents, { [index - 1]: { $set: prevContent } });
-            const ref = this.textInputs[index - 1];
-            ref.reCalculateTextOnUpate = true;
-            selectionStart += 1;
-            // ref.textLength = ref.textLength + 2 + this.textInputs[index + 1].textLength;
-          }
-        }
-
-        newConents = update(newConents, { $splice: [[index, removeCout]] });
-
-        this.contentHeights = update(this.contentHeights, { $splice: [[index, removeCout]] });
-
-        this.focusOnNextUpdate = Math.max(0, index - 1);
-        this.selectionOnFocus = { start: selectionStart, end: selectionStart };
+                  styleList: [
+                    {
+                      fontSize: 20
+                    }
+                  ],
+                  NewLine: true
+                }
+              ]
+            ]
+          });
 
           prevContent.content = update(prevContent.content, {
             $push: nextContent.content
@@ -389,16 +375,14 @@ class CNRichTextEditor extends Component {
           // ref.textLength = ref.textLength + 2 + this.textInputs[index + 1].textLength;
         }
       }
-    }
 
       newConents = update(newConents, { $splice: [[index, removeCout]] });
-
 
       this.contentHeights = update(this.contentHeights, {
         $splice: [[index, removeCout]]
       });
 
-      this.focusOnNextUpdate = index - 1;
+      this.focusOnNextUpdate = Math.max(0, index - 1);
       this.selectionOnFocus = { start: selectionStart, end: selectionStart };
 
       if (this.props.onValueChanged) this.props.onValueChanged(newConents);
@@ -456,30 +440,34 @@ class CNRichTextEditor extends Component {
         <CNTextInput
           keyDownListener={keyDownListener}
           inputAccessoryViewID={inputAccessoryViewID}
-          ref={(input) => { this.textInputs[index] = input; }}
+          ref={input => {
+            this.textInputs[index] = input;
+          }}
           items={input.content}
           onSelectedStyleChanged={this.onSelectedStyleChanged}
           onSelectedTagChanged={this.onSelectedTagChanged}
           onContentChanged={items => this.onContentChanged(items, index)}
           onConnectToPrevClicked={() => this.onConnectToPrevClicked(index)}
-          onMeasureContentChanged={measureScroll ? this.handleMeasureContentChanged : undefined}
-          onFocus={(e) => this.handleOnFocus(e, index)}
-          onBlur={(e)=> this.handleOnBlur(e, index)}
+          onMeasureContentChanged={
+            measureScroll ? this.handleMeasureContentChanged : undefined
+          }
+          onFocus={e => this.handleOnFocus(e, index)}
+          onBlur={e => this.handleOnBlur(e, index)}
           returnKeyType={this.props.returnKeyType}
           foreColor={this.props.foreColor}
           styleList={styles}
           placeholder={index === 0 ? this.props.placeholder : undefined}
           textInputProps={this.props.textInputProps}
-          style={[{
-            flexGrow: 1,
-          }, this.props.textInputStyle]
-                  }
+          style={[
+            {
+              flexGrow: 1
+            },
+            this.props.textInputStyle
+          ]}
         />
       </View>
     );
   }
-
-
 
   renderImage(image, index) {
     let { width, height } = image.size;
@@ -500,7 +488,6 @@ class CNRichTextEditor extends Component {
             ? this.state.layoutWidth - 4
             : width;
       });
-        
     }
 
     myHeight =
